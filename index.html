@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hallo!</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at top, #7dd3fc, #0ea5e9);
+        color: white;
+        font-family: Inter, system-ui, sans-serif;
+        text-align: center;
+      }
+      .hero {
+        padding: 2rem;
+        border-radius: 1.5rem;
+        background: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        max-width: 32rem;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(3rem, 5vw, 5rem);
+        letter-spacing: -0.04em;
+      }
+      p {
+        margin: 1rem 0 0;
+        font-size: 1.2rem;
+        opacity: 0.92;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hero">
+      <h1>Hallo!</h1>
+      <p>Welcome to your new homepage.</p>
+      <p>Robots are instructed via <a href="/robots.txt">/robots.txt</a>.</p>
+    </div>
+  </body>
+</html>

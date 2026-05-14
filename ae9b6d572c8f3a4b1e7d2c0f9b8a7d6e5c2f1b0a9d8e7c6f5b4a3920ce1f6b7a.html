@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hidden Page</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at top, #111827, #1f2937);
+        color: #f8fafc;
+        font-family: Inter, system-ui, sans-serif;
+        text-align: center;
+      }
+      .hero {
+        padding: 2rem;
+        border-radius: 1.5rem;
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        max-width: 36rem;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        letter-spacing: -0.04em;
+      }
+      p {
+        margin: 1rem 0 0;
+        font-size: 1rem;
+        line-height: 1.75;
+        opacity: 0.92;
+      }
+      a {
+        color: #38bdf8;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hero">
+      <h1>Hidden Page</h1>
+      <p>This page is intentionally hard to type and marked <strong>noindex</strong> for crawlers.</p>
+      <p>Robots rules are defined at <a href="/robots.txt">/robots.txt</a>.</p>
+    </div>
+  </body>
+</html>
