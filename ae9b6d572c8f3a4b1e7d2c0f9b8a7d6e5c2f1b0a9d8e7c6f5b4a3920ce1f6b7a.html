@@ -1,51 +1,1185 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hidden Page</title>
-    <meta name="robots" content="noindex, nofollow" />
-    <style>
-      body {
-        margin: 0;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: radial-gradient(circle at top, #111827, #1f2937);
-        color: #f8fafc;
-        font-family: Inter, system-ui, sans-serif;
-        text-align: center;
-      }
-      .hero {
-        padding: 2rem;
-        border-radius: 1.5rem;
-        background: rgba(255, 255, 255, 0.08);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-        max-width: 36rem;
-      }
-      h1 {
-        margin: 0;
-        font-size: clamp(2.5rem, 5vw, 4rem);
-        letter-spacing: -0.04em;
-      }
-      p {
-        margin: 1rem 0 0;
-        font-size: 1rem;
-        line-height: 1.75;
-        opacity: 0.92;
-      }
-      a {
-        color: #38bdf8;
-        text-decoration: none;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="hero">
-      <h1>Hidden Page</h1>
-      <p>This page is intentionally hard to type and marked <strong>noindex</strong> for crawlers.</p>
-      <p>Robots rules are defined at <a href="/robots.txt">/robots.txt</a>.</p>
+<!DOCTYPE html>    
+<html lang="nl">
+<head>
+<meta name="robots" content="noindex, nofollow" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=0.8">
+<title>Stamboom Trees Meijer</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f5f2ec;
+  color: #2c3e50;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  background: linear-gradient(135deg, #d35400 0%, #f5cccc 100%);
+  color: white;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+header h1 { font-size: 1.15rem; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+header p  { font-size: 0.78rem; opacity: 0.8; margin-top: 3px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+.header-right { font-size: 0.72rem; opacity: 0.75; text-align: right; line-height: 1.5; color: #2a0a00; }
+
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+#tree-area {
+  flex: 1;
+  overflow: auto;
+  padding: 36px 44px 70px 44px;
+  position: relative;
+}
+
+#tree-container {
+  position: relative;
+  min-width: 1380px;
+}
+
+#lines-svg {
+  position: absolute;
+  top: 0; left: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.gen-row {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  margin-bottom: 52px;
+  position: relative;
+  border-radius: 10px;
+  padding: 8px 6px;
+}
+.gen-row-center {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-bottom: 52px;
+  position: relative;
+  border-radius: 10px;
+  padding: 8px 6px;
+}
+
+/* ── Generatiebanden: warm (oud) → koel (jong) ─────────────────────────── */
+#gen4   { background: hsl(12, 38%, 92%); }
+#gen3   { background: hsl(10, 28%, 94%); }
+#gen2   { background: hsl(8,  18%, 95%); }
+#gen1   { background: hsl(5,  12%, 96%); }
+#gen0   { background: transparent; }
+#gen_m1 { background: hsl(200, 18%, 95%); }
+#gen_m2 { background: hsl(208, 26%, 93%); }
+#gen_m3 { background: hsl(212, 32%, 91%); }
+
+.gen-label {
+  position: absolute;
+  left: -36px; top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  font-size: 0.62rem; color: #bbb;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.col-third {
+  width: 33.33%;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+.couple-group { display: flex; align-items: center; gap: 3px; }
+.couple-x {
+  font-size: 0.95rem; color: #bbb;
+  padding: 0 3px; flex-shrink: 0;
+  align-self: center; margin-top: -6px;
+}
+
+/* BASE CARD */
+.card {
+  width: 116px;
+  padding: 8px 9px 7px;
+  border-radius: 8px;
+  border: 2px solid #c8bfb0;
+  cursor: pointer;
+  transition: transform 0.13s, box-shadow 0.13s;
+  text-align: center;
+  background: white;
+  user-select: none;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+  filter: brightness(1.08);
+}
+.card.selected {
+  outline: 3px solid #e67e22;
+  outline-offset: 2px;
+  border-color: #e67e22;
+}
+
+.card-nick  { font-size: 0.9rem; font-weight: 700; color: #2c3e50; line-height: 1.1; }
+.card-fname { font-size: 0.67rem; color: #999; margin-top: 2px; line-height: 1.3; }
+.card-years { font-size: 0.67rem; color: #aaa; margin-top: 4px; }
+
+/* Smaller sibling cards */
+.card-sm { width: 110px; padding: 7px 8px 6px; }
+.card-sm .card-nick  { font-size: 0.83rem; }
+.card-sm .card-years { font-size: 0.62rem; }
+
+/* Trees — central person highlight */
+.card-trees {
+  border-color: #d35400 !important;
+  background: #fff9f5 !important;
+}
+.card-trees .card-nick { color: #d35400; }
+
+/* Placeholder */
+.card-placeholder {
+  width: 116px; padding: 8px 9px;
+  border-radius: 8px;
+  border: 2px dashed #d5d8dc;
+  text-align: center;
+  color: #bbb; font-size: 0.7rem;
+  font-style: italic; background: #fafafa;
+  line-height: 1.6;
+}
+
+/* Section divider */
+.gen-divider {
+  border: none;
+  border-top: 2px dashed #ddd;
+  margin: 4px 0 48px;
+  position: relative;
+}
+.gen-divider-label {
+  position: absolute; top: -9px;
+  left: 50%; transform: translateX(-50%);
+  background: #f5f2ec; padding: 0 10px;
+  font-size: 0.68rem; color: #bbb;
+  white-space: nowrap; letter-spacing: 0.05em;
+}
+
+/* ── DETAIL PANEL ── */
+#detail {
+  width: 300px; min-width: 300px;
+  background: white;
+  border-left: 1px solid #e0dbd2;
+  overflow-y: auto;
+  padding: 18px 16px;
+  display: none; flex-direction: column;
+}
+#detail.open { display: flex; }
+
+.dp-close {
+  align-self: flex-end;
+  background: none; border: none;
+  font-size: 1.3rem; cursor: pointer;
+  color: #bbb; line-height: 1; margin-bottom: 4px;
+}
+.dp-close:hover { color: #555; }
+
+.dp-nick { font-size: 1.2rem; font-weight: 700; color: #2c3e50; margin-bottom: 2px; }
+.dp-name { font-size: 0.78rem; color: #999; font-style: italic; margin-bottom: 6px; }
+.dp-role { font-size: 0.72rem; color: #aaa; margin-bottom: 14px; }
+
+.dp-sec { margin-bottom: 14px; }
+.dp-sec h3 {
+  font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.09em; color: #ccc;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 4px; margin-bottom: 8px;
+}
+.dp-row { display: flex; gap: 8px; margin-bottom: 5px; font-size: 0.8rem; line-height: 1.35; }
+.dp-lbl { color: #bbb; min-width: 62px; font-size: 0.74rem; flex-shrink: 0; }
+.dp-val { color: #2c3e50; }
+
+.dp-note { font-size: 0.76rem; color: #777; font-style: italic; line-height: 1.55; margin-bottom: 8px; }
+
+.dp-src-list { list-style: none; padding: 0; }
+.dp-src-list li { margin-bottom: 6px; font-size: 0.75rem; line-height: 1.45; }
+.dp-src-list a {
+  color: #2471a3; text-decoration: none;
+  border-bottom: 1px solid #b0c8e0;
+  word-break: break-word;
+}
+.dp-src-list a:hover { color: #1a5276; border-color: #1a5276; }
+.dp-src-list .src-label { color: #aaa; display: block; font-size: 0.7rem; margin-bottom: 1px; }
+.dp-src-list .src-plain { color: #aaa; font-size: 0.75rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Stamboom — Trees Meijer</h1>
+    <p>Theresia Maria Agnes Aussems Meijer · geboren 29 november 1939, Amsterdam</p>
+  </div>
+  <div class="header-right">Samengesteld mei 2026<br>Klik op een persoon voor details</div>
+</header>
+
+<div class="main">
+  <div id="tree-area">
+    <div id="tree-container">
+      <svg id="lines-svg" width="0" height="0"></svg>
+
+      <!-- ═══ GEN 4: Overgrootouders ═══ -->
+      <div class="gen-row" id="gen4">
+        <span class="gen-label">Overgrootouders</span>
+
+        <div class="couple-group" id="cg_meijer_overgr">
+          <div class="card" id="c_hendricus_meijer" onclick="toon('hendricus_meijer')">
+            <div class="card-nick">Hendricus †</div>
+            <div class="card-fname">Franciscus Meijer</div>
+            <div class="card-years">* 03-07-1826</div>
+          </div>
+          <span class="couple-x">×</span>
+          <div class="card" id="c_antonia_houtappel" onclick="toon('antonia_houtappel')">
+            <div class="card-nick">Antonia †</div>
+            <div class="card-fname">Johanna Maria Houtappel</div>
+            <div class="card-years">* 09-08-1834</div>
+          </div>
+        </div>
+
+        <div class="couple-group" id="cg_debueger_overgr">
+          <div class="card" id="c_francois_de_bueger" onclick="toon('francois_de_bueger')">
+            <div class="card-nick">Francois †</div>
+            <div class="card-fname">Gerardus de Bueger</div>
+            <div class="card-years">* 10-12-1828</div>
+          </div>
+          <span class="couple-x">×</span>
+          <div class="card" id="c_johanna_steenmeijer" onclick="toon('johanna_steenmeijer')">
+            <div class="card-nick">Johanna †</div>
+            <div class="card-fname">Margaretha Steenmeijer</div>
+            <div class="card-years">* 24-09-1826</div>
+          </div>
+        </div>
+
+        <div class="couple-group" id="cg_joh_hen">
+          <div class="card" id="c_johannes_huijzer" onclick="toon('johannes_huijzer')">
+            <div class="card-nick">Johannes †</div>
+            <div class="card-fname">Antonie Huijzer</div>
+            <div class="card-years">* 07-09-1844</div>
+          </div>
+          <span class="couple-x">×</span>
+          <div class="card" id="c_hendrika_volmer" onclick="toon('hendrika_volmer')">
+            <div class="card-nick">Hendrika †</div>
+            <div class="card-fname">Alberdina Volmer</div>
+            <div class="card-years">* 05-01-1840</div>
+          </div>
+        </div>
+
+        <div class="couple-group" id="cg_fra_joh">
+          <div class="card" id="c_frans_uijttenboogaart" onclick="toon('frans_uijttenboogaart')">
+            <div class="card-nick">Frans †</div>
+            <div class="card-fname">Uijttenboogaart</div>
+            <div class="card-years">* 24-09-1817<br>† 02-11-1896</div>
+          </div>
+          <span class="couple-x">×</span>
+          <div class="card" id="c_johanna_van_beijeren" onclick="toon('johanna_van_beijeren')">
+            <div class="card-nick">Johanna †</div>
+            <div class="card-fname">Sibilla van Beijeren</div>
+            <div class="card-years">* 17-03-1826</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ GEN 3: Grootouders ═══ -->
+      <div class="gen-row" id="gen3">
+        <span class="gen-label">Grootouders</span>
+
+        <div class="couple-group" id="cg_ger_joh">
+          <div class="card" id="c_gerardus_meijer" onclick="toon('gerardus_meijer')">
+            <div class="card-nick">Gerardus †</div>
+            <div class="card-fname">Johannes Ignatius Meijer</div>
+            <div class="card-years">* 18-04-1856</div>
+          </div>
+          <span class="couple-x">×</span>
+          <div class="card" id="c_johanna_de_bueger" onclick="toon('johanna_de_bueger')">
+            <div class="card-nick">Johanna †</div>
+            <div class="card-fname">Margaretha de Bueger</div>
+            <div class="card-years">* 12-01-1856</div>
+          </div>
+        </div>
+
+        <div class="couple-group" id="cg_joh_gijs">
+          <div class="card" id="c_johan_huijzer" onclick="toon('johan_huijzer')">
+            <div class="card-nick">Johan †</div>
+            <div class="card-fname">Antonie Huijzer</div>
+            <div class="card-years">* 29-09-1876<br>† 20-07-1933</div>
+          </div>
+          <span class="couple-x">×</span>
+          <div class="card" id="c_gijsberta_uijttenboogaart" onclick="toon('gijsberta_uijttenboogaart')">
+            <div class="card-nick">Gijsberta †</div>
+            <div class="card-fname">Johanna Uijttenboogaart</div>
+            <div class="card-years">* 04-12-1869</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ GEN 2: Ouders ═══ -->
+      <div class="gen-row" id="gen2">
+        <span class="gen-label">Ouders</span>
+        <div class="couple-group" id="cg_ant_aal">
+          <div class="card" id="c_antonius_meijer" onclick="toon('antonius_meijer')">
+            <div class="card-nick">Toon †</div>
+            <div class="card-fname">Antonius Hendricus Meijer</div>
+            <div class="card-years">* 11-11-1892<br>† 25-05-1977</div>
+          </div>
+          <span class="couple-x">×</span>
+          <div class="card" id="c_aaltje_huijzer" onclick="toon('aaltje_huijzer')">
+            <div class="card-nick">Aaltje †</div>
+            <div class="card-fname">Johanna Gesina Hendrika Huijzer</div>
+            <div class="card-years">* 19-05-1901<br>† 14-05-1956</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ GEN 1: 11 kinderen ═══ -->
+      <div class="gen-row" id="gen1">
+        <span class="gen-label">11 kinderen</span>
+
+        <div class="card card-sm" id="c_jan" onclick="toon('jan')">
+          <div class="card-nick">Jan †</div>
+          <div class="card-fname">Johannes Antonius Hendricus Meijer</div>
+          <div class="card-years">14-11-1922</div>
+        </div>
+        <div class="card card-sm" id="c_annie" onclick="toon('annie')">
+          <div class="card-nick">Annie †</div>
+          <div class="card-fname">Johanna Margaretha Maria Meijer</div>
+          <div class="card-years">10-06-1924</div>
+        </div>
+        <div class="card card-sm" id="c_anton" onclick="toon('anton')">
+          <div class="card-nick">Anton †</div>
+          <div class="card-fname">Antonius Hendricus Gerardus Meijer</div>
+          <div class="card-years">16-05-1926</div>
+        </div>
+        <div class="card card-sm" id="c_gerard1" onclick="toon('gerard1')">
+          <div class="card-nick">Gerard †</div>
+          <div class="card-fname">Gerardus Johannes Ignatius Meijer</div>
+          <div class="card-years">± 1927</div>
+        </div>
+        <div class="card card-sm" id="c_gerard2" onclick="toon('gerard2')">
+          <div class="card-nick">Gerard †</div>
+          <div class="card-fname">Gerardus Johannes Ignatius Meijer</div>
+          <div class="card-years">* 18-04-1930</div>
+        </div>
+        <div class="card card-sm" id="c_alphons" onclick="toon('alphons')">
+          <div class="card-nick">Alphons †</div>
+          <div class="card-fname">Alphons Marie Emiel Meijer</div>
+          <div class="card-years">* 07-10-1931<br>† 25-07-1962</div>
+        </div>
+        <div class="card card-sm" id="c_bep" onclick="toon('bep')">
+          <div class="card-nick">Bep †</div>
+          <div class="card-fname">Gijsbertha Jacoba Maria Meijer</div>
+          <div class="card-years">09-11-1934</div>
+        </div>
+        <div class="card card-sm" id="c_ben" onclick="toon('ben')">
+          <div class="card-nick">Ben †</div>
+          <div class="card-fname">Bernardus Josephus Maria Meijer</div>
+          <div class="card-years">24-04-1936</div>
+        </div>
+        <div class="card card-sm" id="c_agnes" onclick="toon('agnes')">
+          <div class="card-nick">Agnes</div>
+          <div class="card-fname">Agnes Maria Theresia Meijer</div>
+          <div class="card-years">21-04-1938</div>
+        </div>
+        <div class="card card-sm card-trees" id="c_trees" onclick="toon('trees')">
+          <div class="card-nick">★ Trees</div>
+          <div class="card-years">29-11-1939</div>
+        </div>
+        <div class="card card-sm" id="c_cor" onclick="toon('cor')">
+          <div class="card-nick">Cor</div>
+          <div class="card-fname">Cornelis Johannes Maria Meijer</div>
+          <div class="card-years">27-11-1944</div>
+        </div>
+      </div>
+
+      <div class="gen-divider"><span class="gen-divider-label">Nageslacht van Trees</span></div>
+
+      <!-- ═══ GEN 0: Trees × Fons ═══ -->
+      <div class="gen-row-center" id="gen0">
+        <div class="couple-group" id="cg_trees_fons">
+          <div class="card card-trees" id="c_trees2" onclick="toon('trees')" style="width:120px">
+            <div class="card-nick">★ Trees</div>
+            <div class="card-fname">Theresia Maria Agnes Meijer</div>
+            <div class="card-years">* 29-11-1939</div>
+          </div>
+          <span class="couple-x">×</span>
+          <div class="card" id="c_fons" onclick="toon('fons')" style="width:120px;opacity:0.75;">
+            <div class="card-nick">Fons †</div>
+            <div class="card-fname">Alphonsus Adrianus Nicolaas Aussems</div>
+            <div class="card-years">* 26-04-1938<br>† 12-12-2004</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ GEN -1: Kinderen Trees ═══ -->
+      <div class="gen-row" id="gen_m1">
+        <span class="gen-label">Kinderen</span>
+
+        <div class="couple-group" id="cg_michel_christien">
+          <div class="card" id="c_michel_aussems" onclick="toon('michel_aussems')">
+            <div class="card-nick">Michel</div>
+            <div class="card-fname">Michael Alphonsus Aussems</div>
+            <div class="card-years">* 23-3-1961</div>
+          </div>
+          <span class="couple-x">×</span>
+          <div class="card" id="c_christien_bloemhof" onclick="toon('christien_bloemhof')">
+            <div class="card-nick">Christien</div>
+            <div class="card-fname">Christine Neeltje Bloemhof</div>
+            <div class="card-years">* 10-8-1961</div>
+          </div>
+        </div>
+
+        <div class="couple-group" id="cg_lucienne_john">
+          <div class="card" id="c_lucienne_aussems" onclick="toon('lucienne_aussems')">
+            <div class="card-nick">Luciënne</div>
+            <div class="card-fname">Maria Johanna Aussems</div>
+            <div class="card-years">* 22-10-1965</div>
+          </div>
+          <span class="couple-x">×</span>
+          <div class="card" id="c_john_smit" onclick="toon('john_smit')">
+            <div class="card-nick">John</div>
+            <div class="card-fname">Smit</div>
+            <div class="card-years">* 15-11-1968</div>
+          </div>
+        </div>
+
+        <div class="couple-group" id="cg_corne_marcella">
+          <div class="card" id="c_corne_aussems" onclick="toon('corne_aussems')">
+            <div class="card-nick">Corné</div>
+            <div class="card-fname">Cornelis Johannes Aussems</div>
+            <div class="card-years">* 22-9-1967</div>
+          </div>
+          <span class="couple-x">×</span>
+          <div class="card" id="c_marcella_vandenberg" onclick="toon('marcella_vandenberg')">
+            <div class="card-nick">Marcella</div>
+            <div class="card-fname">Marion van den Berg</div>
+            <div class="card-years">* 15-6-1968</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ GEN -2: Kleinkinderen ═══ -->
+      <div class="gen-row" id="gen_m2">
+        <span class="gen-label">Kleinkinderen</span>
+
+        <!-- Michel × Christien -->
+        <div class="col-third">
+          <div class="couple-group" id="cg_jesse_tessa">
+            <div class="card card-sm" id="c_jesse_aussems" onclick="toon('jesse_aussems')">
+              <div class="card-nick">Jesse</div>
+              <div class="card-fname">Ryan Aussems</div>
+              <div class="card-years">* 19-6-1992</div>
+            </div>
+            <span class="couple-x">×</span>
+            <div class="card card-sm" id="c_tessa_hoogeveen" onclick="toon('tessa_hoogeveen')">
+              <div class="card-nick">Tessa</div>
+              <div class="card-fname">Hoogeveen</div>
+              <div class="card-years">* 8-11-1994</div>
+            </div>
+          </div>
+          <div class="couple-group" id="cg_demi_jeffrey">
+            <div class="card card-sm" id="c_demi_aussems" onclick="toon('demi_aussems')">
+              <div class="card-nick">Demi</div>
+              <div class="card-fname">Eileen Aussems</div>
+              <div class="card-years">19-12-1995</div>
+            </div>
+            <span class="couple-x">×</span>
+            <div class="card card-sm" id="c_jeffrey_michel" onclick="toon('jeffrey_michel')">
+              <div class="card-nick">Jeffrey</div>
+              <div class="card-fname">Michel</div>
+              <div class="card-years">* 13-7-1994</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Luciënne × John -->
+        <div class="col-third">
+          <div class="couple-group" id="cg_romy_peter">
+            <div class="card card-sm" id="c_romy_burger" onclick="toon('romy_burger')">
+              <div class="card-nick">Romy</div>
+              <div class="card-fname">Denise Burger</div>
+              <div class="card-years">28-4-1994</div>
+            </div>
+            <span class="couple-x">×</span>
+            <div class="card card-sm" id="c_peter_leeuwenburgh" onclick="toon('peter_leeuwenburgh')">
+              <div class="card-nick">Peter</div>
+              <div class="card-fname">Leeuwenburgh</div>
+              <div class="card-years">3-3-1994</div>
+            </div>
+          </div>
+          <div class="card card-sm" id="c_myron_smit" onclick="toon('myron_smit')">
+            <div class="card-nick">Myron</div>
+            <div class="card-fname">Calvin Smit</div>
+            <div class="card-years">26-3-1998</div>
+          </div>
+          <div class="couple-group" id="cg_tristan_tessa">
+            <div class="card card-sm" id="c_tristan_smit" onclick="toon('tristan_smit')">
+              <div class="card-nick">Tristan</div>
+              <div class="card-fname">Conor Smit</div>
+              <div class="card-years">* 17-6-2001</div>
+            </div>
+            <span class="couple-x">×</span>
+            <div class="card card-sm" id="c_tessa_van_elderen" onclick="toon('tessa_van_elderen')">
+              <div class="card-nick">Tessa</div>
+              <div class="card-fname">Van Elderen</div>
+              <div class="card-years">* 4-10-2001</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Corné × Marcella -->
+        <div class="col-third">
+          <div class="card card-sm" id="c_amos_aussems" onclick="toon('amos_aussems')">
+            <div class="card-nick">Amos</div>
+            <div class="card-fname">Isra Aussems</div>
+            <div class="card-years">8-11-2002</div>
+          </div>
+          <div class="card card-sm" id="c_isis_aussems" onclick="toon('isis_aussems')">
+            <div class="card-nick">Isis</div>
+            <div class="card-fname">Juno Aussems</div>
+            <div class="card-years">20-6-2004</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ GEN -3: Achterkleinkinderen ═══ -->
+      <div class="gen-row" id="gen_m3">
+        <span class="gen-label">Achterkleinkinderen</span>
+
+        <!-- Via Michel (Demi × Jeffrey) -->
+        <div class="col-third">
+          <div class="card card-sm" id="c_lise_michel" onclick="toon('lise_michel')">
+            <div class="card-nick">Lise Saar</div>
+            <div class="card-fname">Michel</div>
+            <div class="card-years">7-2-2024</div>
+          </div>
+        </div>
+
+        <!-- Via Luciënne (Romy × Peter) -->
+        <div class="col-third">
+          <div class="card card-sm" id="c_semm_leeuwenburgh" onclick="toon('semm_leeuwenburgh')">
+            <div class="card-nick">Semm</div>
+            <div class="card-fname">Aiden Leeuwenburgh</div>
+            <div class="card-years">4-6-2020</div>
+          </div>
+          <div class="card card-sm" id="c_faye_leeuwenburgh" onclick="toon('faye_leeuwenburgh')">
+            <div class="card-nick">Faye</div>
+            <div class="card-fname">Amelie Leeuwenburgh</div>
+            <div class="card-years">10-2-2024</div>
+          </div>
+        </div>
+
+        <!-- Via Corné (geen achterkleinkinderen) -->
+        <div class="col-third"></div>
+      </div>
+
     </div>
-  </body>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div id="detail">
+    <button class="dp-close" onclick="sluit()">×</button>
+    <div id="dp-body"></div>
+  </div>
+</div>
+
+<script>
+// ── PERSOON DATA ─────────────────────────────────────────────────────────────
+// src entries: { label, url } of gewoon string voor geen link
+const P = {
+
+  johannes_huijzer: {
+    nick:'Johannes', name:'Johannes Antonie Huijzer',
+    role:'Overgrootvader · moederszijde (Huijzer-lijn)',
+    born:'7 september 1844', bornPl:'Den Haag',
+    prof:'Metselaar',
+    rel:'Rooms-Katholiek',
+    spouse:'Hendrika Alberdina Volmer', married:'13 mei 1868, Amsterdam',
+    note:'Geboren in Den Haag, in 1844 een overwegend Protestantse stad. Geen katholieke devotienamen aangetroffen in de Huijzer-lijn.',
+    src:[
+      { label:'BS Huwelijk 1868 Amsterdam (WieWasWie ID 35481640)', url:'https://www.wiewaswie.nl/nl/detail/35481640' },
+      { label:'Bevolkingsregister 1851–1853, Stadsarchief Amsterdam', url:null },
+      { label:'BS Huwelijk 1899 Amsterdam — als vader van de bruidegom (WieWasWie ID 31172802)', url:'https://www.wiewaswie.nl/nl/detail/31172802' }
+    ]
+  },
+
+  hendrika_volmer: {
+    nick:'Hendrika', name:'Hendrika Alberdina Volmer',
+    role:'Overgrootmoeder · moederszijde (Huijzer-lijn)',
+    born:'5 januari 1840',
+    prof:'Naaister',
+    rel:'Rooms-Katholiek',
+    spouse:'Johannes Antonie Huijzer', married:'13 mei 1868, Amsterdam',
+    note:'Geboortedatum bevestigd via archiefrecord. Religie: Rooms-Katholiek (vastgesteld via WieWasWie).',
+    src:[
+      { label:'BS Huwelijk 1868 Amsterdam (WieWasWie ID 35481640)', url:'https://www.wiewaswie.nl/nl/detail/35481640' },
+      { label:'BS Huwelijk 1899 Amsterdam — als moeder van de bruidegom (WieWasWie ID 31172802)', url:'https://www.wiewaswie.nl/nl/detail/31172802' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 81562096)', url:'https://www.wiewaswie.nl/nl/detail/81562096' },
+      { label:'Geloof RK — Amsterdam (WieWasWie ID 78752343)', url:'https://www.wiewaswie.nl/nl/detail/78752343' }
+    ]
+  },
+
+  frans_uijttenboogaart: {
+    nick:'Frans', name:'Frans Uijttenboogaart',
+    role:'Overgrootvader · moederszijde (Uijttenboogaart-lijn)',
+    born:'24 september 1817', bornPl:'Amsterdam',
+    died:'2 november 1896', diedPl:'Bloemendaal',
+    prof:'Schilder',
+    rel:'Onzeker',
+    spouse:'Johanna Sibilla van Beijeren', married:'20 juni 1860, Amsterdam',
+    note:'Geboren 24 september 1817 — was 42 jaar bij zijn huwelijk met Johanna in 1860. Overleed op 2-11-1896 te Bloemendaal, ruim twee jaar vóór het huwelijk van zijn dochter Gijsberta (1899). Eerder gehuwd met Alida Willemina van der Linden, die in 1858 als R.-K. in een Amsterdams ziekenhuis geregistreerd staat — vermoedelijk aldaar overleden, waarna Frans in 1860 hertrouwde.',
+    src:[
+      { label:'BS Geboorte Amsterdam (WieWasWie ID 79785452)', url:'https://www.wiewaswie.nl/nl/detail/79785452' },
+      { label:'Ziekenhuisregistratie 1858 Amsterdam — Alida Willemina van der Linden (eerste echtgenote, R.-K.)', url:'https://www.openarchieven.nl/saa:70560ad2-fa56-4dc2-9b75-c91f108e7749?six=5&name=Alida+Willemina+van+der+Linden&archive=saa&number_show=10&sort=1' },
+      { label:'BS Huwelijk 1860 Amsterdam — Frans Uijttenboogaart × Johanna Sibilla van Beijeren (Open Archieven — NHA)', url:'https://www.openarchieven.nl/nha:bd764a50-9a7c-4af2-9942-d957411cc4aa/en' },
+      { label:'BS Huwelijk 1860 Amsterdam — als bruidegom (WieWasWie ID 35435557)', url:'https://www.wiewaswie.nl/nl/detail/35435557' },
+      { label:'BS Huwelijk 1899 Amsterdam — als vader van de bruid (reeds overledene, WieWasWie ID 31172802)', url:'https://www.wiewaswie.nl/nl/detail/31172802' },
+      { label:'Akte Amsterdam (WieWasWie ID 31388554)', url:'https://www.wiewaswie.nl/nl/detail/31388554' },
+      { label:'BS Overlijden Bloemendaal 02-11-1896 (WieWasWie — ID niet opgeslagen)', url:null }
+    ]
+  },
+
+  johanna_van_beijeren: {
+    nick:'Johanna', name:'Johanna Sibilla van Beijeren',
+    role:'Overgrootmoeder · moederszijde (Uijttenboogaart-lijn)',
+    born:'17 maart 1826', bornPl:'Amsterdam',
+    rel:'Rooms-Katholiek',
+    prof:'Dienstbode',
+    spouse:'Frans Uijtten Boogaart', married:'20 juni 1860, Amsterdam',
+    note:'Geboortedatum bevestigd via bevolkingsregister (leeftijd 33 jaar, ± 1859). Vader: Bernardus Johannes van Beijeren (R.-K., gedoopt Amsterdam). Mogelijk nog in leven op 8 maart 1899 (datum huwelijk Gijsberta) — status in akte nader te verifiëren.',
+    src:[
+      { label:'BS Huwelijk 1860 Amsterdam — Frans Uijtten Boogaart × Johanna Sibilla van Beijeren (Open Archieven — NHA)', url:'https://www.openarchieven.nl/nha:bd764a50-9a7c-4af2-9942-d957411cc4aa/en' },
+      { label:'BS Huwelijk 1860 Amsterdam — als bruid (WieWasWie ID 35435557)', url:'https://www.wiewaswie.nl/nl/detail/35435557' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 80130731)', url:'https://www.wiewaswie.nl/nl/detail/80130731' },
+      { label:'BS Huwelijk 1899 Amsterdam — status in leven/wijlen nader te verifiëren (WieWasWie ID 31172802)', url:'https://www.wiewaswie.nl/nl/detail/31172802' },
+      { label:'Doopregister Amsterdam — Bernardus Johannes van Beijeren (vader Johanna, R.-K.)', url:'https://www.openarchieven.nl/saa:6981a901-db7b-4812-a326-3f1c820e0f8c?six=9&name=Anna+Maria+de+Wilde+1750-1824&archive=saa&number_show=10&sort=4&eventplace=Amsterdam' }
+    ]
+  },
+
+  hendricus_meijer: {
+    nick:'Hendricus', name:'Hendricus Franciscus Meijer',
+    role:'Overgrootvader · vaderszijde (Meijer-lijn)',
+    born:'3 juli 1826', bornPl:'Amsterdam',
+    prof:'Kleermaker',
+    rel:'Rooms-Katholiek',
+    spouse:'Antonia Johanna Maria Houtappel',
+    note:'Vader van Gerardus Johannes Ignatius Meijer. Blijkt uit de huwelijksakte van Gerardus × Johanna de Bueger (20 juni 1878, Amsterdam). Beroep kleermaker — evenals zijn zoon Gerardus én zijn schoonvader Francois de Bueger.',
+    src:[
+      { label:'BS Geboorte Amsterdam (WieWasWie ID 80138479)', url:'https://www.wiewaswie.nl/nl/detail/80138479' },
+      { label:'Rooms-Katholiek Amsterdam (WieWasWie ID 79644516)', url:'https://www.wiewaswie.nl/nl/detail/79644516' },
+      { label:'BS Huwelijk Hendricus Meijer × Antonia Houtappel Amsterdam (WieWasWie ID 35478307)', url:'https://www.wiewaswie.nl/nl/detail/35478307' },
+      { label:'BS Huwelijk 20 juni 1878 Amsterdam — NHA duplo-register (WieWasWie ID 31199764)', url:'https://www.wiewaswie.nl/nl/detail/31199764' },
+      { label:'BS Overlijden Amsterdam (WieWasWie ID 27806535)', url:'https://www.wiewaswie.nl/nl/detail/27806535' }
+    ]
+  },
+
+  antonia_houtappel: {
+    nick:'Antonia', name:'Antonia Johanna Maria Houtappel',
+    role:'Overgrootmoeder · vaderszijde (Meijer-lijn)',
+    born:'9 augustus 1834', bornPl:'Amsterdam',
+    rel:'Rooms-Katholiek',
+    spouse:'Hendricus Franciscus Meijer',
+    note:'Moeder van Gerardus Johannes Ignatius Meijer. Blijkt uit de huwelijksakte van Gerardus × Johanna de Bueger (20 juni 1878, Amsterdam). De naam "Maria" in de combinatie "Antonia Johanna Maria" is een aanwijzing voor katholiek milieu.',
+    src:[
+      { label:'BS Geboorte Amsterdam (WieWasWie ID 88874096)', url:'https://www.wiewaswie.nl/nl/detail/88874096' },
+      { label:'BS Huwelijk Hendricus Meijer × Antonia Houtappel Amsterdam (WieWasWie ID 35478307)', url:'https://www.wiewaswie.nl/nl/detail/35478307' },
+      { label:'BS Huwelijk 20 juni 1878 Amsterdam — NHA duplo-register (WieWasWie ID 31199764)', url:'https://www.wiewaswie.nl/nl/detail/31199764' }
+    ]
+  },
+
+  francois_de_bueger: {
+    nick:'Francois', name:'Francois Gerardus de Bueger',
+    role:'Overgrootvader · vaderszijde (De Bueger-lijn)',
+    born:'10 december 1828', bornPl:'Amsterdam',
+    prof:'Kleermaker',
+    rel:'Rooms-Katholiek',
+    spouse:'Johanna Margaretha Steenmeijer',
+    note:'Vader van Johanna Margaretha de Bueger (*12 jan 1856). Blijkt uit de huwelijksakte van Gerardus × Johanna de Bueger (20 juni 1878, Amsterdam). Opmerkelijk: drie mannen in dezelfde akte waren kleermaker — Gerardus Meijer (bruidegom), diens vader Hendricus Meijer én Francois de Bueger (vader van de bruid).',
+    src:[
+      { label:'BS Huwelijk 18 augustus 1852 Amsterdam — François de Bueger × Johanna Steenmeijer (WieWasWie ID 35477206)', url:'https://www.wiewaswie.nl/nl/detail/35477206' },
+      { label:'BS Huwelijk 18 augustus 1852 Amsterdam — NHA duplo-register (WieWasWie ID 31199764)', url:'https://www.wiewaswie.nl/nl/detail/31199764' },
+      { label:'Rooms-Katholiek Amsterdam (WieWasWie ID 80278111)', url:'https://www.wiewaswie.nl/nl/detail/80278111' },
+      { label:'BS Overlijden Amsterdam (WieWasWie ID 27807969)', url:'https://www.wiewaswie.nl/nl/detail/27807969' }
+    ]
+  },
+
+  johanna_steenmeijer: {
+    nick:'Johanna', name:'Johanna Margaretha Steenmeijer',
+    role:'Overgrootmoeder · vaderszijde (De Bueger-lijn)',
+    born:'24 september 1826', bornPl:'Deventer',
+    prof:'Dienstbode',
+    rel:'Rooms-Katholiek (vrijwel zeker)',
+    spouse:'Francois Gerardus de Bueger',
+    note:'Moeder van Johanna Margaretha de Bueger (*12 jan 1856). Blijkt uit de huwelijksakte van Gerardus × Johanna de Bueger (20 juni 1878, Amsterdam).',
+    src:[
+      { label:'BS Geboorte Deventer (WieWasWie ID 50559139)', url:'https://www.wiewaswie.nl/nl/detail/50559139' },
+      { label:'BS Huwelijk 18 augustus 1852 Amsterdam — François de Bueger × Johanna Steenmeijer (WieWasWie ID 35477206)', url:'https://www.wiewaswie.nl/nl/detail/35477206' },
+      { label:'BS Huwelijk 18 augustus 1852 Amsterdam — NHA duplo-register (WieWasWie ID 31199764)', url:'https://www.wiewaswie.nl/nl/detail/31199764' },
+      { label:'Rooms-Katholiek Amsterdam (WieWasWie ID 78809757)', url:'https://www.wiewaswie.nl/nl/detail/78809757' }
+    ]
+  },
+
+  gerardus_meijer: {
+    nick:'Gerardus', name:'Gerardus Johannes Ignatius Meijer',
+    role:'Grootvader · vaderszijde',
+    born:'18 april 1856', bornPl:'Amsterdam', prof:'Kleermaker',
+    rel:'Rooms-Katholiek (vrijwel zeker)',
+    spouse:'Johanna Margaretha de Bueger', married:'20 juni 1878, Amsterdam',
+    note:'De naam "Ignatius" is nagenoeg uitsluitend een Katholieke naam, vernoemd naar St. Ignatius van Loyola (1491–1556), stichter van de Jezuïetenorde. Ouders (blijkt uit huwelijksakte): Hendricus Franciscus Meijer × Antonia Johanna Maria Houtappel.',
+    src:[
+      { label:'BS Geboorte 18 april 1856 Amsterdam — Stadsarchief', url:'https://archief.amsterdam/indexen/deeds/4cec068d-73c3-41ee-8d95-e488697ecdfd' },
+      { label:'BS Huwelijk 20 juni 1878 Amsterdam — huwelijk en Ouders NHA (WieWasWie ID 31199764)', url:'https://www.wiewaswie.nl/nl/detail/31199764' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 79734561)', url:'https://www.wiewaswie.nl/nl/detail/79734561' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 80138426)', url:'https://www.wiewaswie.nl/nl/detail/80138426' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 80986563)', url:'https://www.wiewaswie.nl/nl/detail/80986563' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 102818202)', url:'https://www.wiewaswie.nl/nl/detail/102818202' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 115511743)', url:'https://www.wiewaswie.nl/nl/detail/115511743' },
+      { label:'BS Huwelijk 1921 Amsterdam — NHA Archief 358.6, Reg.nr. 2505 — als vader van de bruidegom', url:null }
+    ]
+  },
+
+  johanna_de_bueger: {
+    nick:'Johanna', name:'Johanna Margaretha de Bueger',
+    role:'Grootmoeder · vaderszijde',
+    born:'12 januari 1856', bornPl:'Amsterdam', prof:'Huisvrouw',
+    rel:'Rooms-Katholiek (vrijwel zeker)',
+    spouse:'Gerardus Johannes Ignatius Meijer', married:'20 juni 1878, Amsterdam',
+    note:'De de Bueger-familie in Amsterdam droeg namen als "Leopold Bonaventure" en "Maria Petronella" — uitsluitend Katholieke heiligenamen. Ouders (blijkt uit huwelijksakte): Francois Gerardus de Bueger × Johanna Margaretha Steenmeijer.',
+    src:[
+      { label:'BS Huwelijk 20 juni 1878 Amsterdam — huwelijk en Ouders NHA (WieWasWie ID 31199764)', url:'https://www.wiewaswie.nl/nl/detail/31199764' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 80141392)', url:'https://www.wiewaswie.nl/nl/detail/80141392' },
+      { label:'RK Ziekenhuis Amsterdam — Stadsarchief deed 39b64855', url:'https://archief.amsterdam/indexen/deeds/39b64855' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 79734515)', url:'https://www.wiewaswie.nl/nl/detail/79734515' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 80986558)', url:'https://www.wiewaswie.nl/nl/detail/80986558' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 81945264)', url:'https://www.wiewaswie.nl/nl/detail/81945264' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 82669645)', url:'https://www.wiewaswie.nl/nl/detail/82669645' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 83045552)', url:'https://www.wiewaswie.nl/nl/detail/83045552' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 79734556)', url:'https://www.wiewaswie.nl/nl/detail/79734556' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 89530249)', url:'https://www.wiewaswie.nl/nl/detail/89530249' },
+      { label:'Akte Stadsarchief Amsterdam (WieWasWie ID 81945264 / deed 98891177)', url:'https://archief.amsterdam/indexen/deeds/98891177-cde5-4931-9264-0d73e27a83ac' },
+      { label:'BS Huwelijk 1921 Amsterdam — NHA Archief 358.6, Reg.nr. 2505 — als moeder van de bruidegom', url:null },
+      { label:'Geheugenboek Trees — foto pagina 17', url:null }
+    ]
+  },
+
+  johan_huijzer: {
+    nick:'Johan', name:'Johan Antonie Huijzer',
+    role:'Grootvader · moederszijde',
+    born:'29 september 1876', bornPl:'Amsterdam',
+    died:'20 juli 1933', diedPl:'Haarlemmermeer',
+    prof:'Magazijnbediende',
+    rel:'Waarschijnlijk Nederlands Hervormd',
+    spouse:'Gijsberta Johanna Uijttenboogaart', married:'8 maart 1899, Amsterdam',
+    note:'Naampatroon in de Huijzer-lijn (Aaltje, Gesina, Alberdina) duidt op Protestants milieu. Zijn dochter Aaltje bekeerde zich waarschijnlijk bij haar huwelijk met de RK Antonius Meijer (1921).',
+    src:[
+      { label:'BS Huwelijk 1899 Amsterdam — Johan Huijzer × Gijsberta Uijttenboogaart (WieWasWie ID 31172802)', url:'https://www.wiewaswie.nl/nl/detail/31172802' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 81562077)', url:'https://www.wiewaswie.nl/nl/detail/81562077' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 102938091)', url:'https://www.wiewaswie.nl/nl/detail/102938091' },
+      { label:'Bevolkingsregister Amsterdam (WieWasWie ID 119517656)', url:'https://www.wiewaswie.nl/nl/detail/119517656' },
+      { label:'BS Overlijden 1933 Haarlemmermeer (WieWasWie ID 32190139)', url:'https://www.wiewaswie.nl/nl/detail/32190139' }
+    ]
+  },
+
+  gijsberta_uijttenboogaart: {
+    nick:'Gijsberta', name:'Gijsberta Johanna Uijttenboogaart',
+    role:'Grootmoeder · moederszijde',
+    born:'4 december 1869', bornPl:'Amsterdam',
+    rel:'Onzeker; waarschijnlijk Protestants',
+    spouse:'Johan Antonie Huijzer', married:'8 maart 1899, Amsterdam',
+    note:'De familienaam Uijttenboogaart heeft een historische associatie met de Remonstrantse predikant Johannes Wtenbogaert (1557–1644). Geen Katholieke devotienamen aangetroffen.',
+    src:[
+      { label:'BS Geboorte 1869 Amsterdam — Stadsarchief Amsterdam', url:'https://archief.amsterdam/indexen/deeds/985328d2-d20f-54fb-e053-b784100a56f8' },
+      { label:'BS Huwelijk 1899 Amsterdam — Johan Huijzer × Gijsberta Uijttenboogaart (WieWasWie ID 31172802)', url:'https://www.wiewaswie.nl/nl/detail/31172802' },
+      { label:'BS Huwelijk 1921 Amsterdam — NHA Archief 358.6, Reg.nr. 2505 — als moeder van de bruid (WieWasWie ID 31255632)', url:'https://www.wiewaswie.nl/nl/detail/31255632' }
+    ]
+  },
+
+  antonius_meijer: {
+    nick:'Toon', name:'Antonius Hendricus Meijer',
+    role:'Vader van Trees',
+    born:'11 november 1892', bornPl:'Amsterdam',
+    died:'25 mei 1977', diedPl:'Hilversum',
+    prof:'Kleermaker',
+    rel:'Rooms-Katholiek',
+    spouse:'Johanna Gesina Hendrika Huijzer (Aaltje)', married:'22 september 1921, Amsterdam',
+    note:'Woonachtig op Krugerplein 11, Amsterdam Oost. Vader van 11 kinderen.',
+    src:[
+      { label:'Geboorteregister Amsterdam (WieWasWie ID 102651296 — nader te verifiëren)', url:'https://www.wiewaswie.nl/nl/detail/102651296' },
+      { label:'Persoonskaart — Stadsarchief Amsterdam, Archief 30238 inv. 1650, scan A05907_0334_0862.jp2', url:'https://archief.amsterdam/archief/30238/1650' },
+      { label:'BS Huwelijk 1921 Amsterdam — NHA Archief 358.6, Reg.nr. 2505 (WieWasWie ID 31338296)', url:'https://www.wiewaswie.nl/nl/detail/31338296' },
+      { label:'BS Geboorte 1892 Amsterdam — Stadsarchief Amsterdam', url:'https://archief.amsterdam/indexen/deeds/98533415-7562-56a3-e053-b784100ade19' },
+      { label:'Registerafbeelding geboorteakte — Archieven.nl', url:'https://preserve2.archieven.nl/proxy/fonc-ecal/0262/143/2004_069_00171.jp2?h=Zm4ybWF0PWVtYmVkJmtleT1GQzYzOURBMThGRUVBMUJ9OEgxMTg2RTFCNzgDMEUyMSZtaWFkdE0yNiZtaWFoZE0xNTYxMz91MzMzJm1pdmFzdE01JnRva2VuPUZER9NGNzhGNj90RTFCNzA0M9UzMTQDM99wMEg5MzB9JnJkdE0yME95MEUzMCZzZXNzaW4uX2lkPXBtNm0DNGN0OGU0ZGVmMW82djNnZ3ZucmVr&params=' },
+      { label:'Inventarisnummer — Stadsarchief Amsterdam (niet openbaar vóór 31-12-2099)', url:'https://archief.amsterdam/inventarissen/file/8d6f9a6f-6923-3277-9e1a-1b00a0ad1daf' },
+      { label:'Woonadres Krugerplein 11 — Google Maps', url:'https://maps.app.goo.gl/DD4PEUSuPzMdMCLz5' },
+      { label:'Foto woonadres — Stadsarchief Amsterdam Beeldbank', url:'https://archief.amsterdam/beeldbank/detail/084d269a-c9b8-dc02-3e22-1297cf08af81' }
+    ]
+  },
+
+  aaltje_huijzer: {
+    nick:'Aaltje', name:'Johanna Gesina Hendrika Huijzer',
+    role:'Moeder van Trees',
+    born:'19 mei 1901', bornPl:'Amsterdam',
+    died:'14 mei 1956', diedPl:'Amsterdam',
+    prof:'Coupeuse',
+    rel:'Waarschijnlijk bekeerd naar RK bij huwelijk 1921',
+    spouse:'Antonius Hendricus Meijer', married:'22 september 1921, Amsterdam',
+    note:'Roepnaam: Aaltje. Geboren in waarschijnlijk Protestants milieu (Huijzer-lijn). Overlijdensdatum afgeleid van persoonskaart Toon: huwelijk ontbonden 14 mei 1956.',
+    src:[
+      { label:'Persoonskaart — Stadsarchief Amsterdam, Archief 30238 inv. 376, scan A01232_0376_0906.jp2', url:null },
+      { label:'BS Huwelijk 1921 Amsterdam — NHA Archief 358.6, Reg.nr. 2505 (WieWasWie ID 31338296)', url:'https://www.wiewaswie.nl/nl/detail/31338296' },
+      { label:'BS Geboorte — Stadsarchief Amsterdam', url:'https://archief.amsterdam/indexen/deeds/985333e9-da62-56a3-e053-b784100ade19' },
+      { label:'Geboorteakte scan (pagina 1) — Memorix', url:'https://download-images.memorix.nl/tlb/download/fullsize/5f901158-6437-1607-e8e6-ac57ef96ba52.jpg' },
+      { label:'Geboorteakte scan (pagina 2) — Memorix', url:'https://download-images.memorix.nl/tlb/download/fullsize/e05fb978-25c3-adcf-868c-afc521c6eae3.jpg' }
+    ]
+  },
+
+  jan:     { nick:'Jan',        name:'Johannes Antonius Hendricus Meijer', role:'Broer van Trees (oudste)', born:'14 november 1922', bornPl:'Amsterdam' },
+  annie:   { nick:'Annie',      name:'Johanna Margaretha Maria Meijer',    role:'Zus van Trees',            born:'10 juni 1924',      bornPl:'Amsterdam' },
+  anton:   { nick:'Anton',      name:'Antonius Hendricus Gerardus Meijer', role:'Broer van Trees',           born:'16 mei 1926',       bornPl:'Amsterdam' },
+  gerard1: { nick:'Gerard (†)', name:'Gerardus Johannes Ignatius Meijer',  role:'Broer van Trees (jong gestorven)', born:'± 1927', bornPl:'Amsterdam', died:'jong gestorven', note:'Jong gestorven. Daarna werd dezelfde naam gegeven aan het volgende kind (Gerard 2, *18-04-1928).' },
+  gerard2: { nick:'Gerard',     name:'Gerardus Johannes Ignatius Meijer',  role:'Broer van Trees (jong gestorven)', born:'18 april 1930', bornPl:'Amsterdam', note:'Tweede kind met deze naam; de eerste (± 1927) overleed jong.',
+    src:[ { label:'BS Geboorte 18-04-1930 Amsterdam — Stadsarchief Amsterdam', url:'https://archief.amsterdam/indexen/deeds/985333fa-2e46-56a3-e053-b784100ade19' } ] },
+  alphons: { nick:'Alphons',    name:'Alphons Marie Emiel Meijer',         role:'Broer van Trees',           born:'7 oktober 1931',    bornPl:'Amsterdam', died:'25 juli 1962', diedPl:'Rotterdam', note:'Roepnaam onzeker (Fons?). Niet vermeld in het geheugenboek van Trees; bevestigd via archiefkaart.',
+    src:[
+      { label:'BS Overlijden Rotterdam 1962 (WieWasWie ID 63982450)', url:'https://www.wiewaswie.nl/nl/detail/63982450' },
+      { label:'BS Overlijden Rotterdam — Stadsarchief Rotterdam', url:'https://stadsarchief.rotterdam.nl/' },
+      { label:'Archief Amsterdam (WieWasWie ID 31333349)', url:'https://www.wiewaswie.nl/nl/detail/31333349' }
+    ] },
+  agnes:   { nick:'Agnes',      name:'Agnes Maria Theresia Meijer',        role:'Zus van Trees',            born:'21 april 1938',     bornPl:'Amsterdam' },
+  bep:     { nick:'Bep',        name:'Gijsbertha Jacoba Maria Meijer',     role:'Zus van Trees',            born:'9 november 1934',   bornPl:'Amsterdam' },
+  ben:     { nick:'Ben',        name:'Bernardus Josephus Maria Meijer',    role:'Broer van Trees',           born:'24 april 1936',     bornPl:'Amsterdam' },
+  trees: {
+    nick:'Trees', name:'Theresia Maria Agnes Meijer',
+    role:'Centrale persoon',
+    born:'29 november 1939', bornPl:'Amsterdam',
+    rel:'Rooms-Katholiek',
+    spouse:'Alphonsus Adrianus Nicolaas Aussems (Fons)', married:'?',
+    note:'Roepnamen: Trees / Sia / Siepie. Kleuterschool: Clara Fey school. Basisschool: Leonardus (eerste gemengde katholieke school). Woonachtig in Lelystad.',
+    src:[ { label:'Geheugenboek Trees (handgeschreven)', url:null } ]
+  },
+  fons: {
+    nick:'Fons', name:'Alphonsus Adrianus Nicolaas Aussems',
+    role:'Echtgenoot van Trees',
+    born:'26 april 1938', bornPl:'Loon op Zand',
+    died:'12 december 2004',
+    spouse:'Theresia Maria Agnes Meijer (Trees)',
+    src:[
+      { label:'OpenArchieven — Regionaal Archief Tilburg (Alphons Adrianus Nicolaas Aussems)', url:'https://www.openarchieven.nl/rat:783a663a-3860-11e0-bcd1-8edf61960649?six=1&name=Alphons+Adrianus+Nicolaas+Aussems&archive=rat' }
+    ]
+  },
+
+  michel_aussems: {
+    nick:'Michel', name:'Michael Alphonsus Aussems',
+    role:'Zoon van Trees · 1e kind',
+    born:'23 maart 1961', bornPl:'Amsterdam',
+    spouse:'Christine Neeltje Bloemhof (Christien)', married:'12 oktober 1990'
+  },
+  christien_bloemhof: {
+    nick:'Christien', name:'Christine Neeltje Aussems-Bloemhof',
+    role:'Schoondochter · partner van Michel',
+    born:'10 augustus 1961', bornPl:'Haarlem',
+    spouse:'Michael Alphonsus Aussems (Michel)', married:'12 oktober 1990'
+  },
+  lucienne_aussems: {
+    nick:'Luciënne', name:'Luciënne Maria Johanna Aussems',
+    role:'Dochter van Trees · 2e kind',
+    born:'22 oktober 1965', bornPl:'Amsterdam',
+    spouse:'John Smit', married:'21 november 1997'
+  },
+  john_smit: {
+    nick:'John', name:'John Smit',
+    role:'Schoonzoon · partner van Luciënne',
+    born:'15 november 1968', bornPl:'Naarden',
+    spouse:'Luciënne Maria Johanna Aussems', married:'21 november 1997'
+  },
+  corne_aussems: {
+    nick:'Corné', name:'Cornelis Johannes Aussems',
+    role:'Zoon van Trees · 3e kind',
+    born:'22 september 1967', bornPl:'Amsterdam',
+    spouse:'Marcella Marion van den Berg', married:'16 september 2002'
+  },
+  marcella_vandenberg: {
+    nick:'Marcella', name:'Marcella Marion van den Berg',
+    role:'Schoondochter · partner van Corné',
+    born:'15 juni 1968', bornPl:'Rotterdam',
+    spouse:'Cornelis Johannes Aussems (Corné)', married:'16 september 2002'
+  },
+
+  jesse_aussems: {
+    nick:'Jesse', name:'Jesse Ryan Aussems',
+    role:'Kleinkind van Trees · zoon van Michel',
+    born:'19 juni 1992', bornPl:'Alkmaar',
+    spouse:'Tessa Hoogeveen', married:'19 september 2025'
+  },
+  tessa_hoogeveen: {
+    nick:'Tessa', name:'Tessa Hoogeveen',
+    role:'Kleinkind van Trees (aangetrouwd) · partner van Jesse Aussems',
+    born:'8 november 1994', bornPl:'Enkhuizen',
+    spouse:'Jesse Ryan Aussems', married:'19 september 2025'
+  },
+  demi_aussems: {
+    nick:'Demi', name:'Demi Eileen Aussems',
+    role:'Kleinkind van Trees · dochter van Michel',
+    born:'19 december 1995', bornPl:'Alkmaar',
+    spouse:'Jeffrey Michel'
+  },
+  jeffrey_michel: {
+    nick:'Jeffrey', name:'Jeffrey Cornelis Hendrikus Michel',
+    role:'Kleinkind van Trees (aangetrouwd) · partner van Demi Aussems',
+    born:'13 juli 1994', bornPl:'Hoorn',
+    spouse:'Demi Eileen Aussems'
+  },
+  romy_burger: {
+    nick:'Romy', name:'Romy Denise Burger',
+    role:'Kleinkind van Trees · dochter van Luciënne (uit eerdere relatie)',
+    born:'28 april 1994', bornPl:'Lelystad',
+    spouse:'Peter Leeuwenburgh', married:'4 juni 2022',
+    note:'Romy is uit een eerder huwelijk van Luciënne; draagt de achternaam Burger. Getrouwd met Peter Leeuwenburgh. Samen ouders van Semm Aiden (2020) en Faye Amelie (2024).'
+  },
+  peter_leeuwenburgh: {
+    nick:'Peter', name:'Peter Leeuwenburgh',
+    role:'Kleinkind van Trees (aangetrouwd) · echtgenoot van Romy Burger',
+    born:'3 maart 1994', bornPl:'Heinenoord',
+    spouse:'Romy Denise Burger', married:'4 juni 2022'
+  },
+  myron_smit: {
+    nick:'Myron', name:'Myron Calvin Smit',
+    role:'Kleinkind van Trees · zoon van Luciënne',
+    born:'26 maart 1998', bornPl:'Lelystad'
+  },
+  tristan_smit: {
+    nick:'Tristan', name:'Tristan Conor Smit',
+    role:'Kleinkind van Trees · zoon van Luciënne',
+    born:'17 juni 2001', bornPl:'Lelystad',
+    spouse:'Tessa Stephanie van Elderen', married:'20 juni 2025'
+  },
+  tessa_van_elderen: {
+    nick:'Tessa', name:'Tessa Stephanie van Elderen',
+    role:'Kleinkind van Trees (aangetrouwd) · partner van Tristan Smit',
+    born:'4 oktober 2001', bornPl:'Blaricum',
+    spouse:'Tristan Conor Smit', married:'20 juni 2025'
+  },
+  amos_aussems: {
+    nick:'Amos', name:'Amos Isra Aussems',
+    role:'Kleinkind van Trees · zoon van Corné',
+    born:'8 november 2002', bornPl:'Amsterdam'
+  },
+  isis_aussems: {
+    nick:'Isis', name:'Isis Juno Aussems',
+    role:'Kleinkind van Trees · dochter van Corné',
+    born:'20 juni 2004', bornPl:'Amsterdam'
+  },
+
+  lise_michel: {
+    nick:'Lise Saar', name:'Lise Saar Michel',
+    role:'Achterkleinkind van Trees · dochter van Demi & Jeffrey',
+    born:'7 februari 2024', bornPl:'Hoorn'
+  },
+  semm_leeuwenburgh: {
+    nick:'Semm', name:'Semm Aiden Leeuwenburgh',
+    role:'Achterkleinkind van Trees · zoon van Romy Burger & Peter Leeuwenburgh',
+    born:'4 juni 2020', bornPl:'Lelystad'
+  },
+  faye_leeuwenburgh: {
+    nick:'Faye', name:'Faye Amelie Leeuwenburgh',
+    role:'Achterkleinkind van Trees · dochter van Romy Burger & Peter Leeuwenburgh',
+    born:'10 februari 2024', bornPl:'Lelystad'
+  },
+  cor: { nick:'Cor', name:'Cornelis Johannes Maria Meijer', role:'Jongste broer van Trees', born:'27 november 1944', bornPl:'Amsterdam' }
+};
+
+// ── DETAIL PANEL ─────────────────────────────────────────────────────────────
+let selCard = null;
+
+function toon(id) {
+  const p = P[id]; if (!p) return;
+  if (selCard) selCard.classList.remove('selected');
+  const card = document.getElementById('c_' + id) || document.getElementById('c_' + id + '2');
+  if (card) { card.classList.add('selected'); selCard = card; }
+
+  let h = '';
+  h += `<div class="dp-nick">${p.nick}</div>`;
+  if (p.name && p.name !== p.nick) h += `<div class="dp-name">${p.name}</div>`;
+  h += `<div class="dp-role">${p.role || ''}</div>`;
+
+  h += '<div class="dp-sec"><h3>Persoonsgegevens</h3>';
+  if (p.born || p.bornPl) h += rij('Geboren',  [p.born,  p.bornPl ].filter(Boolean).join(', '));
+  if (p.died || p.diedPl) h += rij('Gestorven',[p.died,  p.diedPl ].filter(Boolean).join(', '));
+  if (p.prof)             h += rij('Beroep',    p.prof);
+  if (p.rel)              h += rij('Geloof',    p.rel);
+  h += '</div>';
+
+  if (p.spouse || p.married) {
+    h += '<div class="dp-sec"><h3>Familie</h3>';
+    if (p.spouse)  h += rij('Partner', p.spouse);
+    if (p.married) h += rij('Gehuwd',  p.married);
+    h += '</div>';
+  }
+
+  if (p.note) h += `<div class="dp-sec"><h3>Toelichting</h3><p class="dp-note">${p.note}</p></div>`;
+
+  if (p.src && p.src.length) {
+    h += '<div class="dp-sec"><h3>Bronnen</h3><ul class="dp-src-list">';
+    p.src.forEach(s => {
+      if (typeof s === 'string') {
+        h += `<li><span class="src-plain">${s}</span></li>`;
+      } else if (s.url) {
+        const target = s.url.startsWith('http') ? ' target="_blank" rel="noopener"' : '';
+        h += `<li><a href="${s.url}"${target}>${s.label}</a></li>`;
+      } else {
+        h += `<li><span class="src-plain">${s.label}</span></li>`;
+      }
+    });
+    h += '</ul></div>';
+  }
+
+  document.getElementById('dp-body').innerHTML = h;
+  document.getElementById('detail').classList.add('open');
+}
+
+function rij(lbl, val) {
+  return `<div class="dp-row"><span class="dp-lbl">${lbl}</span><span class="dp-val">${val}</span></div>`;
+}
+
+function sluit() {
+  document.getElementById('detail').classList.remove('open');
+  if (selCard) { selCard.classList.remove('selected'); selCard = null; }
+}
+
+// ── SVG LIJNEN ───────────────────────────────────────────────────────────────
+const LINKS = [
+  { from:'cg_joh_hen',       to:['c_johan_huijzer'] },
+  { from:'cg_fra_joh',       to:['c_gijsberta_uijttenboogaart'] },
+  { from:'cg_meijer_overgr', to:['c_gerardus_meijer'] },
+  { from:'cg_debueger_overgr', to:['c_johanna_de_bueger'] },
+  { from:'cg_ger_joh',       to:['c_antonius_meijer'] },
+  { from:'cg_joh_gijs',      to:['c_aaltje_huijzer'] },
+  { from:'cg_ant_aal',  to:['c_jan','c_annie','c_anton','c_gerard1','c_gerard2','c_alphons','c_agnes','c_bep','c_ben','c_trees','c_cor'] },
+  { from:'c_trees',     to:['cg_trees_fons'], desc:true },
+  { from:'cg_trees_fons', to:['cg_michel_christien', 'cg_lucienne_john', 'cg_corne_marcella'] },
+  { from:'cg_michel_christien', to:['cg_jesse_tessa', 'cg_demi_jeffrey'] },
+  { from:'cg_lucienne_john', to:['c_myron_smit', 'cg_tristan_tessa'] },
+  { from:'c_lucienne_aussems', to:['cg_romy_peter'] },
+  { from:'cg_corne_marcella', to:['c_amos_aussems', 'c_isis_aussems'] },
+  { from:'cg_demi_jeffrey', to:['c_lise_michel'] },
+  { from:'cg_romy_peter', to:['c_semm_leeuwenburgh', 'c_faye_leeuwenburgh'] }
+];
+
+function tekenLijnen() {
+  const svg  = document.getElementById('lines-svg');
+  const area = document.getElementById('tree-area');
+  const box  = document.getElementById('tree-container');
+  const br   = box.getBoundingClientRect();
+
+  function pos(el) {
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const x = r.left - br.left + r.width  / 2;
+    const y = r.top  - br.top  + r.height / 2;
+    return { x, y, top: y - r.height/2, bot: y + r.height/2 };
+  }
+
+  const W = box.scrollWidth, H = box.scrollHeight;
+  svg.setAttribute('width', W); svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  let d = '';
+  LINKS.forEach(link => {
+    const fp = pos(document.getElementById(link.from)); if (!fp) return;
+    const cps = link.to.map(id => pos(document.getElementById(id))).filter(Boolean);
+    if (!cps.length) return;
+    const px = fp.x, py = fp.bot;
+
+    if (link.desc) {
+      const cp = cps[0];
+      const my = (py + cp.top) / 2;
+      d += `M${px},${py} L${px},${my} L${cp.x},${my} L${cp.x},${cp.top} `;
+      return;
+    }
+    const minTop = Math.min(...cps.map(c => c.top));
+    const my = py + (minTop - py) * 0.5;
+    d += `M${px},${py} L${px},${my} `;
+    if (cps.length === 1) {
+      d += `M${px},${my} L${cps[0].x},${my} L${cps[0].x},${cps[0].top} `;
+    } else {
+      const lx = Math.min(...cps.map(c => c.x), px);
+      const rx = Math.max(...cps.map(c => c.x), px);
+      d += `M${lx},${my} L${rx},${my} `;
+      cps.forEach(c => { d += `M${c.x},${my} L${c.x},${c.top} `; });
+    }
+  });
+
+  svg.innerHTML = `<path d="${d}" fill="none" stroke="#c0b8ae" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+
+// ── GESLACHT PER PERSOON ────────────────────────────────────────────────────
+const GENDERS = {
+  // Gen4 — Overgrootouders
+  johannes_huijzer:'m', hendrika_volmer:'f',
+  frans_uijttenboogaart:'m', johanna_van_beijeren:'f',
+  hendricus_meijer:'m', antonia_houtappel:'f',
+  francois_de_bueger:'m', johanna_steenmeijer:'f',
+  // Gen3 — Grootouders
+  gerardus_meijer:'m', johanna_de_bueger:'f',
+  johan_huijzer:'m', gijsberta_uijttenboogaart:'f',
+  // Gen2 — Ouders
+  antonius_meijer:'m', aaltje_huijzer:'f',
+  // Gen1 — Broers & zussen
+  jan:'m', annie:'f', anton:'m', gerard1:'m', gerard2:'m',
+  alphons:'m', agnes:'f', bep:'f', ben:'m', cor:'m',
+  // Gen0 — Trees & Fons (Trees behoudt eigen stijl via .card-trees)
+  fons:'m', trees:'f',
+  // Gen_m1 — Kinderen
+  michel_aussems:'m', christien_bloemhof:'f',
+  lucienne_aussems:'f', john_smit:'m',
+  corne_aussems:'m', marcella_vandenberg:'f',
+  // Gen_m2 — Kleinkinderen
+  jesse_aussems:'m', tessa_hoogeveen:'f',
+  demi_aussems:'f', jeffrey_michel:'m',
+  romy_burger:'f', peter_leeuwenburgh:'m',
+  myron_smit:'m', tristan_smit:'m', tessa_van_elderen:'f',
+  amos_aussems:'m', isis_aussems:'f',
+  // Gen_m3 — Achterkleinkinderen
+  lise_michel:'f', semm_leeuwenburgh:'m', faye_leeuwenburgh:'f'
+};
+
+// ── KAARTKLEUR: uniform licht blauw (man) / licht rood (vrouw) ──────────────
+const KLEUR_M = { bg:'#ccdff5', color:'#0f1f30' };
+const KLEUR_V = { bg:'#f5cccc', color:'#2a0f0f' };
+
+function kleurKaarten() {
+  document.querySelectorAll('.card[id^="c_"]').forEach(card => {
+    const key = card.id.slice(2);
+    const gender = GENDERS[key];
+    if (!gender) return;
+    const s = gender === 'm' ? KLEUR_M : KLEUR_V;
+    card.style.setProperty('background', s.bg);
+    card.style.setProperty('color', s.color);
+    card.style.setProperty('border-color', s.bg);
+  });
+}
+
+window.addEventListener('load', () => setTimeout(() => { tekenLijnen(); kleurKaarten(); }, 120));
+window.addEventListener('resize', tekenLijnen);
+document.getElementById('tree-area').addEventListener('scroll', tekenLijnen);
+</script>
+</body>
 </html>
